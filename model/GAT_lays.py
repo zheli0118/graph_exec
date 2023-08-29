@@ -4,22 +4,24 @@ import torch.nn.functional as F
 import random
 
 class GAT_layer(nn.Module):
-    def __init__(self, in_feature, out_feature, drop, alpha, concat=True):
+    def __init__(self, in_features, out_features, drop, alpha, concat=True):
         super().__init__()
         self.alpha = alpha
-        self.in_feature = in_feature
-        self.out_feature = out_feature
+        self.in_feature = in_features
+        self.out_feature = out_features
         self.drop = drop
-        self.W = nn.Parameter(torch.zeros(size=(in_feature, out_feature)))
+        self.W = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_uniform(self.W.data, gain=1.414)
-        self.a = nn.Parameter(torch.zeros(size=(2 * out_feature, 1)))
+        self.a = nn.Parameter(torch.zeros(size=(2 * out_features, 1)))
         nn.init.xavier_uniform(self.a.data, gain=1.414)
         self.leakyRelu = nn.LeakyReLU(self.alpha)
 
     def forward(self, input_h, adj):
         h = torch.mm(input_h, self.W)
         N = h.size()[0]
-        input_concat = torch.cat([h.repeat(1, N).view(N*N, -1), h.repeat(N, 1)], dim=1).view(N, -1, 2*self.out_feature)
+        input_concat = torch.cat([h.repeat(1, N).view(N * N, -1), h.repeat(N, 1)], dim=1). \
+            view(N, -1, 2 * self.out_features)
+        # input_concat = torch.cat([h.repeat(1, N).view(N*N, -1), h.repeat(N, 1)], dim=1).view(N, -1, 2*self.out_feature)
         e = self.leakyRelu(torch.matmul(input_concat, self.a).squeeze(2))
         zero_vec = -1e12 * torch.ones_like(e)
         attention = torch.where(adj > 0, e, zero_vec)
