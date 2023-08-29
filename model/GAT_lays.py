@@ -7,8 +7,8 @@ class GAT_layer(nn.Module):
     def __init__(self, in_features, out_features, drop, alpha, concat=True):
         super().__init__()
         self.alpha = alpha
-        self.in_feature = in_features
-        self.out_feature = out_features
+        self.in_features = in_features
+        self.out_features = out_features
         self.drop = drop
         self.W = nn.Parameter(torch.zeros(size=(in_features, out_features)))
         nn.init.xavier_uniform(self.W.data, gain=1.414)
